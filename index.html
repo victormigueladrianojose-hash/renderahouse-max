@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Render a House MAX</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f23;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        .navbar {
+            position: fixed; top: 0; width: 100%; padding: 20px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(15,15,35,0.95); backdrop-filter: blur(20px);
+            z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .navbar .logo {
+            display: flex; align-items: center; gap: 12px;
+            font-size: 24px; font-weight: 700; color: #fff;
+            text-decoration: none;
+        }
+        .navbar .nav-links { display: flex; gap: 30px; align-items: center; }
+        .navbar .nav-links a {
+            color: rgba(255,255,255,0.7); text-decoration: none;
+            font-size: 15px; transition: 0.3s;
+        }
+        .navbar .nav-links a:hover { color: #fff; }
+        .btn {
+            padding: 12px 28px; border-radius: 12px; border: none;
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: 0.3s; text-decoration: none;
+        }
+        .btn-primary { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102,126,234,0.4); }
+        .btn-gold { background: linear-gradient(135deg,#f5a623,#f7c948); color: #1a1a2e; }
+        .hero {
+            min-height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            padding: 120px 40px 60px;
+            background: linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);
+        }
+        .hero h1 {
+            font-size: clamp(48px,8vw,96px); font-weight: 800;
+            background: linear-gradient(135deg,#667eea,#764ba2,#f5a623);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; line-height: 1.1; margin-bottom: 20px;
+        }
+        .hero p {
+            font-size: clamp(18px,2vw,24px); color: rgba(255,255,255,0.7);
+            max-width: 700px; margin-bottom: 40px;
+        }
+        .features {
+            padding: 100px 40px; max-width: 1200px; margin: 0 auto;
+        }
+        .features h2 {
+            font-size: 48px; text-align: center; margin-bottom: 60px;
+            background: linear-gradient(135deg,#667eea,#f5a623);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .features-grid {
+            display: grid; grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+            gap: 30px;
+        }
+        .feature-card {
+            background: #1a1a2e; border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px; padding: 30px; transition: 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(102,126,234,0.3);
+        }
+        .feature-card .icon {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg,rgba(102,126,234,0.2),rgba(118,75,162,0.2));
+            border-radius: 12px; display: flex; align-items: center;
+            justify-content: center; margin-bottom: 15px; font-size: 24px;
+        }
+        .feature-card h3 { font-size: 20px; margin-bottom: 8px; }
+        .feature-card p { color: rgba(255,255,255,0.6); line-height: 1.5; font-size: 14px; }
+        .badge-unlock {
+            display: inline-block; margin-top: 8px; padding: 3px 10px;
+            background: rgba(245,166,35,0.15); color: #f5a623;
+            border-radius: 20px; font-size: 11px; font-weight: 600;
+        }
+        .section-full {
+            padding: 80px 40px; text-align: center;
+            background: linear-gradient(135deg,rgba(102,126,234,0.08),rgba(118,75,162,0.08));
+        }
+        .section-full h2 { font-size: 36px; margin-bottom: 16px; }
+        .section-full p { color: rgba(255,255,255,0.7); font-size: 18px; max-width: 600px; margin: 0 auto 24px; }
+        .badge-big {
+            display: inline-block; padding: 8px 28px;
+            background: linear-gradient(135deg,#f5a623,#f7c948);
+            color: #1a1a2e; border-radius: 30px; font-weight: 700; font-size: 16px;
+        }
+        footer { padding: 30px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); color: rgba(255,255,255,0.3); font-size: 14px; }
+        @media (max-width:768px) {
+            .navbar { padding: 15px 20px; }
+            .navbar .nav-links a:not(.btn) { display: none; }
+            .hero { padding: 100px 20px 40px; }
+            .features { padding: 60px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
+                <rect width="40" height="40" rx="10" fill="url(#g)"/>
+                <path d="M12 28V16L20 10L28 16V28H12Z" fill="white" opacity="0.9"/>
+                <defs><linearGradient id="g" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#667eea"/><stop offset="1" stop-color="#764ba2"/></linearGradient></defs>
+            </svg>
+            Render a House <span style="color:#f5a623;font-size:13px;margin-left:4px;">MAX</span>
+        </a>
+        <div class="nav-links">
+            <a href="#features">Funcionalidades</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="login.html" class="btn btn-primary">Começar Grátis</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Renders que não parecem renders</h1>
+        <p>Transforme seus desenhos arquitetônicos em renders foto-realistas — gratuitamente, sem limites, sem marcas d'água.</p>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;">
+            <a href="login.html" class="btn btn-gold" style="font-size:18px;padding:16px 36px;">🚀 Começar Grátis</a>
+            <a href="dashboard.html" class="btn btn-primary" style="font-size:18px;padding:16px 36px;">Dashboard</a>
+        </div>
+        <p style="margin-top:24px;font-size:13px;color:#f5a623;">✦ Acesso completo • Ilimitado • Sem watermark • Para sempre</p>
+    </section>
+
+    <section class="features" id="features">
+        <h2>Todas as Funcionalidades — Ilimitadas</h2>
+        <div class="features-grid">
+            <div class="feature-card"><div class="icon">🎨</div><h3>Render Pro 4K</h3><p>Renders em altíssima resolução com o modelo Pro.</p><span class="badge-unlock">✅ Ilimitado</span></div>
+            <div class="feature-card"><div class="icon">⚡</div><h3>Render Rápido</h3><p>Fast, Standard e Pro. Resultados em segundos.</p><span class="badge-unlock">✅ Ilimitado</span></div>
+            <div class="feature-card"><div class="icon">🎬</div><h3>Geração de Vídeo</h3><p>Walkthroughs profissionais dos seus projetos.</p><span class="badge-unlock">✅ Ilimitado</span></div>
+            <div class="feature-card"><div class="icon">🏗️</div><h3>Importação 3D</h3><p>GLB, GLTF, OBJ do SketchUp, Revit, Blender.</p><span class="badge-unlock">✅ Ilimitado</span></div>
+            <div class="feature-card"><div class="icon">🗺️</div><h3>Preview 3D Satélite</h3><p>Posicione o modelo em terreno real de satélite.</p><span class="badge-unlock">✅ Completo</span></div>
+            <div class="feature-card"><div class="icon">✏️</div><h3>Edição por Área</h3><p>Selecione e edite sem regenerar o render inteiro.</p><span class="badge-unlock">✅ Ilimitado</span></div>
+            <div class="feature-card"><div class="icon">🎭</div><h3>Estilos Diversos</h3><p>Real photo, sketch, blueprint, watercolor e mais.</p><span class="badge-unlock">✅ Completo</span></div>
+            <div class="feature-card"><div class="icon">☀️</div><h3>Controle de Iluminação</h3><p>Hora do dia, clima, estações — controle total.</p><span class="badge-unlock">✅ Completo</span></div>
+            <div class="feature-card"><div class="icon">🤖</div><h3>Assistente IA</h3><p>Chat que cria prompts automaticamente para si.</p><span class="badge-unlock">✅ Completo</span></div>
+            <div class="feature-card"><div class="icon">📋</div><h3>Copy Render</h3><p>Copie estilos entre perspectivas do projeto.</p><span class="badge-unlock">✅ Ilimitado</span></div>
+            <div class="feature-card"><div class="icon">📁</div><h3>Projetos Ilimitados</h3><p>Sem limites de projetos, views ou renders.</p><span class="badge-unlock">✅ Ilimitado</span></div>
+            <div class="feature-card"><div class="icon">⏫</div><h3>Upscale/Enhance</h3><p>Melhore a qualidade com um clique.</p><span class="badge-unlock">✅ Ilimitado</span></div>
+            <div class="feature-card"><div class="icon">⚡</div><h3>Fila Prioritária</h3><p>Processamento prioritário dos seus renders.</p><span class="badge-unlock">✅ Ativado</span></div>
+            <div class="feature-card"><div class="icon">📥</div><h3>Sem Watermark</h3><p>Download PNG/JPG sem marcas d'água.</p><span class="badge-unlock">✅ Ilimitado</span></div>
+            <div class="feature-card"><div class="icon">🔗</div><h3>Compartilhamento</h3><p>Links públicos para compartilhar renders.</p><span class="badge-unlock">✅ Ilimitado</span></div>
+            <div class="feature-card"><div class="icon">♾️</div><h3>Créditos Ilimitados</h3><p>Sem limites diários nem mensais. Para sempre.</p><span class="badge-unlock">✅ Ilimitado</span></div>
+        </div>
+    </section>
+
+    <section class="section-full">
+        <h2>💎 Plano Máximo — Completamente Grátis</h2>
+        <p>Todas as funcionalidades dos planos Basic, Pro e Studio desbloqueadas. Sem limites, sem watermarks, sem expiração.</p>
+        <span class="badge-big">✨ Acesso Vitalício — Tudo Incluído ✨</span>
+    </section>
+
+    <footer><p>Render a House MAX © 2026 — Versão Completa e Gratuita.</p></footer>
+</body>
+</html>
