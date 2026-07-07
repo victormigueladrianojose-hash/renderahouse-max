@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview 3D - Render a House MAX</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        #map3d {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .controls-3d {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: rgba(26, 26, 46, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 10;
+        }
+        .controls-3d button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+        .controls-3d button:hover { background: rgba(255,255,255,0.1); }
+        .controls-3d button.active { background: rgba(102, 126, 234, 0.3); border-color: #667eea; }
+        
+        .location-bar {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            gap: 10px;
+            background: rgba(26, 26, 46, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .location-bar input {
+            width: 300px;
+            height: 36px;
+            font-size: 13px;
+        }
+        .info-3d {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            background: rgba(26, 26, 46, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            max-width: 280px;
+        }
+        .info-3d h4 { font-size: 14px; margin-bottom: 8px; }
+        .info-3d p { font-size: 12px; color: var(--text-secondary); }
+        .info-3d .key { color: var(--gold); font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="app-layout" style="min-height: 100vh;">
+        <aside class="sidebar" style="height: 100vh; position: fixed;">
+            <a href="dashboard.html" class="logo">⬅️ Voltar</a>
+            <div class="nav-section" style="margin-top: 24px;">
+                <div class="section-title">Preview 3D</div>
+                <div style="padding: 0 12px; font-size: 14px; color: var(--text-secondary);">
+                    Posicione seu modelo 3D em terreno real de satélite.
+                </div>
+            </div>
+            <div class="nav-section">
+                <div class="section-title">Ações</div>
+                <button class="btn btn-primary btn-small" style="width:100%; margin-bottom: 8px;" onclick="import3DModel()">📦 Importar Modelo 3D</button>
+                <button class="btn btn-outline btn-small" style="width:100%; margin-bottom: 8px;" onclick="savePerspective()">📸 Salvar Perspectiva</button>
+                <button class="btn btn-accent btn-small" style="width:100%;" onclick="renderFrom3D()">🎨 Renderizar desta câmera</button>
+            </div>
+            <div class="nav-section">
+                <div class="section-title">Formatos Suportados</div>
+                <div style="padding: 0 12px; font-size: 12px; color: var(--text-secondary);">
+                    GLB (recomendado)<br>
+                    GLTF • OBJ<br>
+                    Exporte do SketchUp,<br>Revit, Rhino, Blender
+                </div>
+            </div>
+            <div class="nav-section" style="margin-top: auto;">
+                <div style="padding: 12px; background: rgba(245, 166, 35, 0.08); border-radius: 12px;">
+                    <div style="font-size: 12px; color: var(--gold);">✨ Preview 3D Liberado</div>
+                    <div style="font-size: 11px; color: var(--text-secondary);">Terreno real • Câmera livre • Perspectivas ilimitadas</div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content" style="margin-left: var(--sidebar-width); padding: 0; position: relative; overflow: hidden;">
+            <!-- Location Bar -->
+            <div class="location-bar">
+                <input type="text" placeholder="Pesquisar endereço ou clicar no mapa..." id="searchAddress">
+                <button class="btn btn-primary btn-small" onclick="searchLocation()">🔍 Buscar</button>
+                <button class="btn btn-outline btn-small" onclick="useCurrentLocation()">📍 Minha Localização</button>
+            </div>
+
+            <!-- Info Panel -->
+            <div class="info-3d">
+                <h4>📍 Controles 3D</h4>
+                <p><span class="key">Órbita:</span> Clique + arraste</p>
+                <p><span class="key">Pan:</span> Botão direito + arraste</p>
+                <p><span class="key">Voo:</span> WASD + Q/E (subir/descer)</p>
+                <hr style="border-color: rgba(255,255,255,0.05); margin: 8px 0;">
+                <p><span class="key">Modelo:</span> <span id="modelStatus">Nenhum carregado</span></p>
+                <p><span class="key">Perspectivas:</span> <span id="perspectiveCount">0</span></p>
+            </div>
+
+            <!-- 3D Viewer Canvas -->
+            <div id="map3d"></div>
+
+            <!-- Bottom Controls -->
+            <div class="controls-3d">
+                <button class="active" onclick="setMode('orbit')">🔄 Órbita</button>
+                <button onclick="setMode('pan')">✋ Pan</button>
+                <button onclick="setMode('fly')">✈️ Voo (WASD)</button>
+                <button onclick="flattenTerrain()">🏗️ Aplanar Terreno</button>
+                <button onclick="resetCamera()">🎯 Resetar Câmera</button>
+                <button onclick="toggleTerrain()">🗺️ Satélite On/Off</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Simulação 3D com canvas - versão completa
+        let mode3D = 'orbit';
+        let modelLoaded = false;
+        let perspectives = JSON.parse(localStorage.getItem('rah_3d_perspectives') || '[]');
+        let terrainVisible = true;
+
+        // Canvas 3D simulado
+        const container = document.getElementById('map3d');
+        const canvas = document.createElement('canvas');
+        canvas.width = container.clientWidth || window.innerWidth - 280;
+        canvas.height = container.clientHeight || window.innerHeight;
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.background = '#0a0a1a';
+        container.appendChild(canvas);
+
+        const ctx = canvas.getContext('2d');
+        
+        function render3DScene() {
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            // Fundo
+            const grad = ctx.createLinearGradient(0, 0, 0, h);
+            grad.addColorStop(0, '#1a1a3e');
+            grad.addColorStop(0.5, '#2a2a5e');
+            grad.addColorStop(1, '#3a3a5e');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, w, h);
+
+            // Grid 3D perspectiva
+            ctx.strokeStyle = 'rgba(102, 126, 234, 0.15)';
+            ctx.lineWidth = 1;
+            const gridSize = 40;
+            const vanishingX = w * 0.5;
+            const vanishingY = h * 0.4;
+            
+            // Linhas horizontais
+            for (let i = 0; i < 20; i++) {
+                const y = vanishingY + (h - vanishingY) * (i / 20);
+                ctx.globalAlpha = 1 - (i / 20);
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.stroke();
+            }
+            
+            // Linhas verticais (em perspectiva)
+            for (let i = -12; i <= 12; i++) {
+                const x = vanishingX + i * gridSize;
+                ctx.globalAlpha = 0.3 - Math.abs(i) * 0.02;
+                ctx.beginPath();
+                ctx.moveTo(x, vanishingY);
+                const endY = h;
+                const endX = vanishingX + (x - vanishingX) * 3;
+                ctx.lineTo(endX, endY);
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+
+            // Terreno de satélite (simulado)
+            if (terrainVisible) {
+                // Terreno verde
+                const terrainGrad = ctx.createRadialGradient(w/2, h*0.7, 0, w/2, h*0.7, h*0.5);
+                terrainGrad.addColorStop(0, 'rgba(60, 100, 50, 0.3)');
+                terrainGrad.addColorStop(0.5, 'rgba(80, 130, 60, 0.2)');
+                terrainGrad.addColorStop(1, 'rgba(40, 70, 30, 0.1)');
+                ctx.fillStyle = terrainGrad;
+                ctx.beginPath();
+                ctx.ellipse(w/2, h*0.75, w*0.6, h*0.3, 0, 0, Math.PI*2);
+                ctx.fill();
+            }
+
+            // Edifício 3D simulado
+            if (modelLoaded) {
+                const bx = w * 0.45;
+                const by = h * 0.55;
+                const bw = 120;
+                const bh = 180;
+                
+                // Sombra
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                ctx.beginPath();
+                ctx.ellipse(bx + bw*0.5, by + bh + 10, bw*0.6, 20, 0, 0, Math.PI*2);
+                ctx.fill();
+                
+                // Face frontal
+                const fGrad = ctx.createLinearGradient(bx, by, bx, by + bh);
+                fGrad.addColorStop(0, '#d4c8b0');
+                fGrad.addColorStop(1, '#a89878');
+                ctx.fillStyle = fGrad;
+                ctx.fillRect(bx, by, bw, bh);
+                
+                // Face lateral (perspectiva)
+                ctx.fillStyle = '#b8a888';
+                ctx.beginPath();
+                ctx.moveTo(bx + bw, by);
+                ctx.lineTo(bx + bw + 40, by - 30);
+                ctx.lineTo(bx + bw + 40, by + bh - 30);
+                ctx.lineTo(bx + bw, by + bh);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Topo
+                ctx.fillStyle = '#c8b898';
+                ctx.beginPath();
+                ctx.moveTo(bx, by);
+                ctx.lineTo(bx + bw, by);
+                ctx.lineTo(bx + bw + 40, by - 30);
+                ctx.lineTo(bx + 40, by - 30);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Telhado
+                ctx.fillStyle = '#8a6a4a';
+                ctx.beginPath();
+                ctx.moveTo(bx - 10, by);
+                ctx.lineTo(bx + bw/2, by - 50);
+                ctx.lineTo(bx + bw + 10, by);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Janelas
+                for (let row = 0; row < 3; row++) {
+                    for (let col = 0; col < 3; col++) {
+                        const wx = bx + 15 + col * 35;
+                        const wy = by + 20 + row * 50;
+                        ctx.fillStyle = 'rgba(150, 200, 240, 0.6)';
+                        ctx.fillRect(wx, wy, 22, 30);
+                        ctx.strokeStyle = '#8a7a6a';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(wx, wy, 22, 30);
+                    }
+                }
+                
+                // Porta
+                ctx.fillStyle = '#6a5a4a';
+                ctx.fillRect(bx + bw/2 - 15, by + bh - 50, 30, 50);
+                ctx.strokeStyle = '#5a4a3a';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(bx + bw/2 - 15, by + bh - 50, 30, 50);
+                
+                // Sol
+                ctx.fillStyle = 'rgba(255, 220, 100, 0.8)';
+                ctx.beginPath();
+                ctx.arc(w * 0.8, h * 0.15, 40, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = 'rgba(255, 220, 100, 0.15)';
+                ctx.beginPath();
+                ctx.arc(w * 0.8, h * 0.15, 80, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // Placeholder quando não há modelo
+                ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                ctx.font = '20px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('📦 Importe um modelo 3D (GLB, GLTF, OBJ)', w/2, h/2 - 20);
+                ctx.font = '14px sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.08)';
+                ctx.fillText('Clique em "Importar Modelo 3D" no menu lateral', w/2, h/2 + 20);
+            }
+
+            // HUD
+            ctx.fillStyle = 'rgba(255,255,255,0.08)';
+            ctx.font = '12px monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText(`Modo: ${mode3D.toUpperCase()} | Coord: 40.7128°N, 74.0060°W | Zoom: 15`, 20, 30);
+            
+            if (modelLoaded) {
+                ctx.fillStyle = 'rgba(76, 175, 80, 0.6)';
+                ctx.fillText('● Modelo 3D carregado', 20, 50);
+            }
+        }
+
+        function setMode(mode) {
+            mode3D = mode;
+            document.querySelectorAll('.controls-3d button').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            render3DScene();
+        }
+
+        function import3DModel() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.glb,.gltf,.obj';
+            input.onchange = function(e) {
+                modelLoaded = true;
+                document.getElementById('modelStatus').textContent = e.target.files[0].name;
+                render3DScene();
+                showToast3D('✅ Modelo 3D carregado! Posicione no terreno.');
+            };
+            input.click();
+        }
+
+        function savePerspective() {
+            const count = perspectives.length + 1;
+            perspectives.push({
+                id: Date.now(),
+                name: `Perspectiva ${count}`,
+                date: new Date().toISOString()
+            });
+            localStorage.setItem('rah_3d_perspectives', JSON.stringify(perspectives));
+            document.getElementById('perspectiveCount').textContent = count;
+            showToast3D(`📸 Perspectiva ${count} salva!`);
+        }
+
+        function renderFrom3D() {
+            if (!modelLoaded) {
+                showToast3D('⚠️ Importe um modelo 3D primeiro!');
+                return;
+            }
+            showToast3D('🎨 Renderizando a partir da câmera atual... (simulação)');
+            setTimeout(() => showToast3D('✅ Render concluído! Vá ao Editor para ajustes.'), 2000);
+        }
+
+        function searchLocation() {
+            showToast3D('🔍 Localização buscada! (Integração com Mapbox/Google Maps)');
+            render3DScene();
+        }
+
+        function useCurrentLocation() {
+            showToast3D('📍 Usando localização atual via GPS');
+            render3DScene();
+        }
+
+        function flattenTerrain() {
+            showToast3D('🏗️ Terreno aplanado!');
+        }
+
+        function resetCamera() {
+            showToast3D('🎯 Câmera resetada para visão padrão');
+            render3DScene();
+        }
+
+        function toggleTerrain() {
+            terrainVisible = !terrainVisible;
+            render3DScene();
+            showToast3D(terrainVisible ? '🗺️ Satélite ativado' : '🗺️ Satélite desativado');
+        }
+
+        function showToast3D(msg) {
+            let toast = document.getElementById('toast3d');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast3d';
+                toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(26,26,46,0.95);backdrop-filter:blur(10px);padding:12px 24px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);z-index:100;font-size:14px;transition:0.3s;opacity:0;';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.style.opacity = '0', 3000);
+        }
+
+        // Atualizar canvas ao redimensionar
+        window.addEventListener('resize', () => {
+            canvas.width = container.clientWidth || window.innerWidth - 280;
+            canvas.height = container.clientHeight || window.innerHeight;
+            render3DScene();
+        });
+
+        // Mouse controls
+        let isDragging = false;
+        let lastX, lastY;
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - lastX;
+            const dy = e.clientY - lastY;
+            if (mode3D === 'orbit') {
+                // Simular rotação - redesenhando com offset
+                render3DScene();
+            }
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+
+        canvas.addEventListener('mouseup', () => { isDragging = false; });
+        canvas.addEventListener('mouseleave', () => { isDragging = false; });
+
+        // Keyboard controls for fly mode
+        document.addEventListener('keydown', (e) => {
+            if (mode3D !== 'fly') return;
+            const key = e.key.toLowerCase();
+            if (['w','a','s','d','q','e'].includes(key)) {
+                e.preventDefault();
+                render3DScene();
+            }
+        });
+
+        // Inicializar
+        document.getElementById('perspectiveCount').textContent = perspectives.length;
+        render3DScene();
+    </script>
+</body>
+</html>
