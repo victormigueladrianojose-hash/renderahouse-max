@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Render - Render a House MAX</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .editor-layout {
+            display: flex;
+            height: calc(100vh - 80px);
+            gap: 0;
+            margin: -30px;
+            margin-top: 0;
+        }
+
+        .editor-sidebar {
+            width: 340px;
+            min-width: 340px;
+            background: var(--primary);
+            border-right: 1px solid var(--card-border);
+            padding: 24px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .editor-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0a0a1a;
+            position: relative;
+        }
+
+        .editor-viewer {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .editor-viewer .placeholder {
+            text-align: center;
+            color: rgba(255,255,255,0.2);
+        }
+
+        .editor-viewer .placeholder .icon { font-size: 80px; margin-bottom: 20px; }
+        .editor-viewer .placeholder h3 { color: rgba(255,255,255,0.5); font-size: 20px; }
+
+        .editor-viewer .render-result {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .editor-bottom {
+            height: 70px;
+            border-top: 1px solid var(--card-border);
+            padding: 15px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--card-bg);
+        }
+
+        .editor-bottom input {
+            flex: 1;
+            height: 40px;
+            border-radius: 10px;
+        }
+
+        .settings-section {
+            margin-bottom: 24px;
+        }
+
+        .settings-section .section-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.3);
+            margin-bottom: 12px;
+        }
+
+        .settings-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .setting-row label { font-size: 13px; margin-bottom: 0; }
+
+        .setting-row select, .setting-row input[type="range"] {
+            width: auto;
+            min-width: 120px;
+        }
+
+        .style-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .style-pill {
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.3s;
+            color: var(--text-secondary);
+        }
+
+        .style-pill:hover, .style-pill.active {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.4);
+            color: #fff;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid var(--card-border);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .toolbar button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #fff;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.3s;
+        }
+
+        .toolbar button:hover { background: rgba(255,255,255,0.1); }
+
+        .upload-zone {
+            border: 2px dashed rgba(255,255,255,0.15);
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 16px;
+        }
+
+        .upload-zone:hover { border-color: rgba(102, 126, 234, 0.5); background: rgba(102, 126, 234, 0.05); }
+
+        .upload-zone .icon { font-size: 40px; margin-bottom: 10px; }
+        .upload-zone p { font-size: 13px; color: var(--text-secondary); }
+
+        .views-dock {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            overflow-x: auto;
+            border-top: 1px solid var(--card-border);
+            background: var(--primary);
+        }
+
+        .view-thumb {
+            width: 80px;
+            height: 60px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .view-thumb.active { border-color: #667eea; }
+
+        .chat-panel {
+            position: absolute;
+            right: 20px;
+            bottom: 90px;
+            width: 320px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 16px;
+            display: none;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .chat-panel.show { display: block; }
+
+        .chat-panel .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .chat-panel .chat-header h4 { font-size: 14px; }
+
+        .chat-messages {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+        }
+
+        .chat-msg {
+            padding: 10px 14px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .chat-msg.assistant {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.15);
+        }
+
+        .chat-msg.user {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            text-align: right;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input input { flex: 1; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="app-layout" style="min-height: 100vh;">
+        <aside class="sidebar" style="height: 100vh; position: fixed;">
+            <a href="dashboard.html" class="logo">⬅️ Voltar</a>
+            <div class="nav-section" style="margin-top: 24px;">
+                <div class="section-title">Projeto Atual</div>
+                <div id="currentProjectName" style="font-size: 16px; font-weight: 600; padding: 0 12px; margin-bottom: 16px;">Novo Projeto</div>
+            </div>
+            <div class="nav-section">
+                <div class="section-title">Views (Perspectivas)</div>
+                <div id="viewsList">
+                    <div class="view-item" style="padding: 8px 12px; background: rgba(102,126,234,0.1); border-radius: 8px; font-size: 13px; display: flex; justify-content: space-between;">
+                        <span>📍 View 1</span>
+                        <span style="color: var(--text-secondary);">2 renders</span>
+                    </div>
+                </div>
+                <button class="btn btn-outline btn-small" style="width:100%; margin-top: 8px;" onclick="addView()">+ Adicionar Perspectiva</button>
+            </div>
+        </aside>
+
+        <main class="main-content" style="margin-left: var(--sidebar-width); padding: 0;">
+            <div class="topbar" style="padding: 16px 24px; margin-bottom: 0; border-bottom: 1px solid var(--card-border);">
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <span style="color: var(--text-secondary);">📁 Projeto: <strong id="projectNameDisplay">Meu Projeto</strong></span>
+                    <span style="color: var(--gold); font-size: 13px;">♾️ Créditos ilimitados</span>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-small btn-outline" onclick="toggleChat()">💬 Chat IA</button>
+                    <button class="btn btn-small btn-primary" onclick="renderNow()">🎨 Renderizar</button>
+                </div>
+            </div>
+
+            <div class="editor-layout">
+                <!-- Settings Panel (Left) -->
+                <div class="editor-sidebar">
+                    <!-- Upload Zone -->
+                    <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+                        <div class="icon">📤</div>
+                        <p><strong>Clique para fazer upload</strong><br>ou arraste um arquivo</p>
+                        <p style="font-size: 11px; margin-top: 8px;">PNG, JPG, WebP • Máx 5MB</p>
+                        <p style="font-size: 11px; color: var(--gold);">Ou importe modelo 3D: GLB, GLTF, OBJ</p>
+                        <input type="file" id="fileInput" accept="image/*,.glb,.gltf,.obj" style="display: none;" onchange="handleUpload(this)">
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="section-title">Modelo de Render</div>
+                        <div class="style-pills">
+                            <span class="style-pill" onclick="selectModel(this, 'fast')">⚡ Fast</span>
+                            <span class="style-pill" onclick="selectModel(this, 'standard')">📐 Standard</span>
+                            <span class="style-pill active" onclick="selectModel(this, 'pro')">💎 Pro</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="section-title">Resolução</div>
+                        <select id="resolutionSelect" style="width:100%;">
+                            <option value="1k">Standard 1K (1 crédito)</option>
+                            <option value="2k">Standard 2K (1.5 créditos)</option>
+                            <option value="4k" selected>Pro 4K (4 créditos)</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="section-title">Estilo</div>
+                        <div class="style-pills" style="margin-bottom: 8px;">
+                            <span class="style-pill active" onclick="selectStyle(this, 'real')">📷 Real Photo</span>
+                            <span class="style-pill" onclick="selectStyle(this, 'sketch')">✏️ Sketch</span>
+                            <span class="style-pill" onclick="selectStyle(this, 'blueprint')">📐 Blueprint</span>
+                            <span class="style-pill" onclick="selectStyle(this, 'watercolor')">🎨 Watercolor</span>
+                            <span class="style-pill" onclick="selectStyle(this, 'concept')">🎭 Concept Art</span>
+                            <span class="style-pill" onclick="selectStyle(this, 'dusk')">🌅 Epic Dusk</span>
+                            <span class="style-pill" onclick="selectStyle(this, 'autumn')">🍂 Autumn Forest</span>
+                        </div>
+                        <button class="btn btn-small btn-outline" style="width:100%;" onclick="uploadCustomStyle()">📤 Upload Estilo Personalizado</button>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="section-title">Hora do Dia</div>
+                        <select id="timeOfDay" style="width:100%;">
+                            <option value="dawn">🌅 Amanhecer</option>
+                            <option value="morning">🌤️ Manhã</option>
+                            <option value="noon" selected>☀️ Meio-dia</option>
+                            <option value="afternoon">🌇 Tarde</option>
+                            <option value="sunset">🌅 Pôr do Sol</option>
+                            <option value="dusk">🌆 Crepúsculo</option>
+                            <option value="night">🌙 Noite</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="section-title">Localização</div>
+                        <select id="location" style="width:100%;">
+                            <option value="">📍 Não definido</option>
+                            <option value="beach">🏖️ Praia</option>
+                            <option value="forest">🌲 Floresta</option>
+                            <option value="suburb">🏡 Subúrbio</option>
+                            <option value="city">🌆 Cidade</option>
+                            <option value="mountain">⛰️ Montanha</option>
+                            <option value="countryside">🌾 Campo</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="section-title">Clima</div>
+                        <select id="weather" style="width:100%;">
+                            <option value="sunny" selected>☀️ Ensolarado</option>
+                            <option value="cloudy">☁️ Nublado</option>
+                            <option value="rainy">🌧️ Chuvoso</option>
+                            <option value="snowy">❄️ Nevando</option>
+                            <option value="foggy">🌫️ Nevoeiro</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="section-title">Referências</div>
+                        <div class="setting-row" style="flex-direction: column; gap: 8px;">
+                            <button class="btn btn-small btn-outline" style="width:100%;">📎 Upload Material</button>
+                            <button class="btn btn-small btn-outline" style="width:100%;">🖼️ Upload Estilo</button>
+                            <button class="btn btn-small btn-outline" style="width:100%;">🏗️ Upload Objeto</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 16px; padding: 16px; background: rgba(245, 166, 35, 0.08); border-radius: 12px; border: 1px solid rgba(245, 166, 35, 0.15);">
+                        <div style="font-size: 13px; color: var(--gold); font-weight: 600;">✨ Plano Máximo Ativo</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Copy Render • Fila Prioritária • Sem watermark • 4K • Vídeo</div>
+                    </div>
+                </div>
+
+                <!-- Main Viewer -->
+                <div class="editor-main">
+                    <div class="toolbar">
+                        <button onclick="generateNewVersion()">🔄 Nova Versão</button>
+                        <button onclick="editImage()">✏️ Editar Imagem</button>
+                        <button onclick="selectArea()">🔲 Selecionar Área</button>
+                        <button onclick="compare()">📊 Comparar</button>
+                        <button onclick="enhance()">✨ Melhorar Qualidade</button>
+                        <button onclick="downloadRender()">📥 Download</button>
+                        <button onclick="shareRender()">🔗 Compartilhar</button>
+                    </div>
+
+                    <div class="editor-viewer" id="editorViewer">
+                        <div class="placeholder" id="placeholder">
+                            <div class="icon">🏗️</div>
+                            <h3>Faça upload de um desenho ou modelo 3D</h3>
+                            <p style="color: rgba(255,255,255,0.2); margin-top: 10px;">Arraste um arquivo ou use as configurações ao lado</p>
+                        </div>
+                        <img id="renderResult" class="render-result" alt="Render preview">
+                    </div>
+
+                    <!-- Chat Panel -->
+                    <div class="chat-panel" id="chatPanel">
+                        <div class="chat-header">
+                            <h4>💬 Assistente de Render</h4>
+                            <button class="btn-icon" onclick="toggleChat()">✕</button>
+                        </div>
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="chat-msg
