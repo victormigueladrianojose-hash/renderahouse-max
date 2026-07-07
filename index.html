@@ -1,167 +1,294 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-PT">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Render a House MAX</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0f0f23;
-            color: #fff;
-            overflow-x: hidden;
-        }
-        .navbar {
-            position: fixed; top: 0; width: 100%; padding: 20px 40px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(15,15,35,0.95); backdrop-filter: blur(20px);
-            z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .navbar .logo {
-            display: flex; align-items: center; gap: 12px;
-            font-size: 24px; font-weight: 700; color: #fff;
-            text-decoration: none;
-        }
-        .navbar .nav-links { display: flex; gap: 30px; align-items: center; }
-        .navbar .nav-links a {
-            color: rgba(255,255,255,0.7); text-decoration: none;
-            font-size: 15px; transition: 0.3s;
-        }
-        .navbar .nav-links a:hover { color: #fff; }
-        .btn {
-            padding: 12px 28px; border-radius: 12px; border: none;
-            font-size: 15px; font-weight: 600; cursor: pointer;
-            transition: 0.3s; text-decoration: none;
-        }
-        .btn-primary { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102,126,234,0.4); }
-        .btn-gold { background: linear-gradient(135deg,#f5a623,#f7c948); color: #1a1a2e; }
-        .hero {
-            min-height: 100vh; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; text-align: center;
-            padding: 120px 40px 60px;
-            background: linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);
-        }
-        .hero h1 {
-            font-size: clamp(48px,8vw,96px); font-weight: 800;
-            background: linear-gradient(135deg,#667eea,#764ba2,#f5a623);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text; line-height: 1.1; margin-bottom: 20px;
-        }
-        .hero p {
-            font-size: clamp(18px,2vw,24px); color: rgba(255,255,255,0.7);
-            max-width: 700px; margin-bottom: 40px;
-        }
-        .features {
-            padding: 100px 40px; max-width: 1200px; margin: 0 auto;
-        }
-        .features h2 {
-            font-size: 48px; text-align: center; margin-bottom: 60px;
-            background: linear-gradient(135deg,#667eea,#f5a623);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .features-grid {
-            display: grid; grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
-            gap: 30px;
-        }
-        .feature-card {
-            background: #1a1a2e; border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 20px; padding: 30px; transition: 0.3s;
-        }
-        .feature-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(102,126,234,0.3);
-        }
-        .feature-card .icon {
-            width: 50px; height: 50px;
-            background: linear-gradient(135deg,rgba(102,126,234,0.2),rgba(118,75,162,0.2));
-            border-radius: 12px; display: flex; align-items: center;
-            justify-content: center; margin-bottom: 15px; font-size: 24px;
-        }
-        .feature-card h3 { font-size: 20px; margin-bottom: 8px; }
-        .feature-card p { color: rgba(255,255,255,0.6); line-height: 1.5; font-size: 14px; }
-        .badge-unlock {
-            display: inline-block; margin-top: 8px; padding: 3px 10px;
-            background: rgba(245,166,35,0.15); color: #f5a623;
-            border-radius: 20px; font-size: 11px; font-weight: 600;
-        }
-        .section-full {
-            padding: 80px 40px; text-align: center;
-            background: linear-gradient(135deg,rgba(102,126,234,0.08),rgba(118,75,162,0.08));
-        }
-        .section-full h2 { font-size: 36px; margin-bottom: 16px; }
-        .section-full p { color: rgba(255,255,255,0.7); font-size: 18px; max-width: 600px; margin: 0 auto 24px; }
-        .badge-big {
-            display: inline-block; padding: 8px 28px;
-            background: linear-gradient(135deg,#f5a623,#f7c948);
-            color: #1a1a2e; border-radius: 30px; font-weight: 700; font-size: 16px;
-        }
-        footer { padding: 30px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); color: rgba(255,255,255,0.3); font-size: 14px; }
-        @media (max-width:768px) {
-            .navbar { padding: 15px 20px; }
-            .navbar .nav-links a:not(.btn) { display: none; }
-            .hero { padding: 100px 20px 40px; }
-            .features { padding: 60px 20px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Render a House MAX - Transforme Desenhos em Renders Foto-realistas</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--primary:#0a0a1a;
+--secondary:#12122a;
+--card:#1a1a3e;
+--accent:#667eea;
+--accent2:#764ba2;
+--gold:#f5a623;
+--gold2:#f7c948;
+--text:#ffffff;
+--text2:rgba(255,255,255,0.7);
+--text3:rgba(255,255,255,0.4);
+--danger:#e94560;
+--success:#4caf50;
+--radius:16px;
+--transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--primary);color:var(--text);overflow-x:hidden;scroll-behavior:smooth}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--primary)}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.15)}
+
+/* NAVBAR */
+.navbar{position:fixed;top:0;width:100%;padding:16px 48px;display:flex;justify-content:space-between;align-items:center;background:rgba(10,10,26,0.85);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);z-index:1000;border-bottom:1px solid rgba(255,255,255,0.05)}
+.navbar .logo{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:800;color:#fff;text-decoration:none}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff}
+.logo span{background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:11px;font-weight:700;margin-left:2px;letter-spacing:1px}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:14px;font-weight:500;transition:var(--transition);position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:var(--transition)}
+.nav-links a:hover::after{width:100%}
+.nav-links a:hover{color:#fff}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:12px;border:none;font-size:15px;font-weight:600;cursor:pointer;transition:var(--transition);text-decoration:none}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(102,126,234,0.35)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--primary)}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(245,166,35,0.35)}
+.btn-outline{background:transparent;border:2px solid rgba(255,255,255,0.15);color:#fff}
+.btn-outline:hover{border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.05)}
+.btn-lg{padding:16px 40px;font-size:17px;border-radius:14px}
+.btn-sm{padding:8px 18px;font-size:13px;border-radius:10px}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:140px 40px 80px;position:relative;overflow:hidden;background:linear-gradient(135deg,#0a0a1a 0%,#12122a 40%,#1a1a3e 70%,#0a0a1a 100%)}
+.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 50%,rgba(102,126,234,0.06) 0%,transparent 50%),radial-gradient(circle at 70% 50%,rgba(118,75,162,0.06) 0%,transparent 50%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);border-radius:30px;font-size:13px;color:var(--gold);font-weight:600;margin-bottom:32px}
+.hero h1{font-size:clamp(48px,8vw,96px);font-weight:900;line-height:1.05;margin-bottom:24px;position:relative}
+.hero h1 .gradient{background:linear-gradient(135deg,var(--accent),var(--accent2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:clamp(17px,1.8vw,22px);color:var(--text2);max-width:680px;margin-bottom:40px;line-height:1.6;position:relative}
+.hero-actions{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;position:relative}
+.hero-features{display:flex;gap:32px;margin-top:48px;flex-wrap:wrap;justify-content:center;position:relative}
+.hero-feat{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text3)}
+.hero-feat svg{width:18px;height:18px}
+
+/* SECTIONS */
+.section{padding:100px 48px;max-width:1280px;margin:0 auto}
+.section-title{text-align:center;margin-bottom:64px}
+.section-title h2{font-size:42px;font-weight:800;margin-bottom:16px}
+.section-title h2 span{background:linear-gradient(135deg,var(--accent),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.section-title p{color:var(--text2);font-size:17px;max-width:560px;margin:0 auto;line-height:1.6}
+
+/* FEATURES GRID */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px}
+.feature-card{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);padding:32px;transition:var(--transition);position:relative;overflow:hidden}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--gold));opacity:0;transition:var(--transition)}
+.feature-card:hover::before{opacity:1}
+.feature-card:hover{transform:translateY(-6px);border-color:rgba(102,126,234,0.2);box-shadow:0 24px 60px rgba(0,0,0,0.3)}
+.f-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:18px;background:linear-gradient(135deg,rgba(102,126,234,0.15),rgba(118,75,162,0.15))}
+.feature-card h3{font-size:19px;font-weight:700;margin-bottom:8px}
+.feature-card p{color:var(--text2);font-size:14px;line-height:1.6;margin-bottom:12px}
+.f-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(245,166,35,0.12);color:var(--gold);border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+
+/* SHOWCASE */
+.showcase{background:var(--secondary);padding:80px 48px}
+.showcase-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:20px;max-width:1280px;margin:0 auto}
+.showcase-item{aspect-ratio:16/10;border-radius:14px;overflow:hidden;position:relative;background:linear-gradient(135deg,#1a1a3e,#12122a);border:1px solid rgba(255,255,255,0.06)}
+.showcase-item .overlay{position:absolute;bottom:0;left:0;right:0;padding:20px;background:linear-gradient(transparent,rgba(0,0,0,0.8))}
+.showcase-item .overlay h4{font-size:16px;font-weight:600}
+.showcase-item .overlay p{font-size:12px;color:var(--text3)}
+.showcase-visual{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:56px;background:linear-gradient(135deg,rgba(102,126,234,0.08),rgba(118,75,162,0.08))}
+
+/* PRICING BANNER */
+.pricing-banner{text-align:center;padding:80px 48px;background:linear-gradient(135deg,rgba(102,126,234,0.06),rgba(118,75,162,0.06))}
+.pricing-banner h2{font-size:38px;font-weight:800;margin-bottom:16px}
+.pricing-banner p{color:var(--text2);font-size:17px;max-width:600px;margin:0 auto 32px}
+.pricing-badge{display:inline-block;padding:12px 32px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--primary);border-radius:40px;font-weight:800;font-size:18px}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;max-width:1000px;margin:40px auto 0}
+.pricing-card{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);padding:32px;text-align:center;transition:var(--transition);position:relative}
+.pricing-card.featured{border-color:var(--gold);box-shadow:0 0 40px rgba(245,166,35,0.1)}
+.pricing-card.featured::before{content:'MAIS POPULAR';position:absolute;top:-12px;left:50%;transform:translateX(-50%);padding:4px 16px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--primary);border-radius:20px;font-size:11px;font-weight:800;letter-spacing:1px}
+.pricing-card h3{font-size:20px;margin-bottom:8px}
+.pricing-card .price{font-size:36px;font-weight:800;margin:16px 0}
+.pricing-card .price small{font-size:14px;font-weight:400;color:var(--text3)}
+.pricing-card ul{list-style:none;text-align:left;margin:20px 0}
+.pricing-card ul li{padding:8px 0;font-size:14px;color:var(--text2);display:flex;align-items:center;gap:8px}
+.pricing-card ul li::before{content:'✓';color:var(--success);font-weight:700}
+
+/* COMPARE TABLE */
+.compare-table{width:100%;border-collapse:collapse;margin-top:40px}
+.compare-table th,.compare-table td{padding:14px 20px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);font-size:14px}
+.compare-table th{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:600}
+.compare-table td:first-child{text-align:left;font-weight:500}
+.compare-table .check{color:var(--success)}
+.compare-table .cross{color:var(--text3)}
+.compare-table tr:hover td{background:rgba(255,255,255,0.02)}
+
+/* TESTIMONIALS */
+.testimonials{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;max-width:1000px;margin:0 auto}
+.testimonial-card{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);padding:28px}
+.testimonial-card .stars{color:var(--gold);margin-bottom:12px;font-size:16px}
+.testimonial-card p{color:var(--text2);font-size:14px;line-height:1.7;margin-bottom:16px;font-style:italic}
+.testimonial-card .author{display:flex;align-items:center;gap:12px}
+.testimonial-card .author .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.testimonial-card .author .name{font-size:14px;font-weight:600}
+.testimonial-card .author .role{font-size:12px;color:var(--text3)}
+
+/* FOOTER */
+footer{background:var(--secondary);border-top:1px solid rgba(255,255,255,0.05);padding:48px 48px 24px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1280px;margin:0 auto}
+.footer-col h4{font-size:14px;font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px;color:var(--text3)}
+.footer-col a{display:block;color:var(--text2);text-decoration:none;font-size:14px;padding:4px 0;transition:var(--transition)}
+.footer-col a:hover{color:#fff}
+.footer-bottom{text-align:center;padding-top:32px;margin-top:32px;border-top:1px solid rgba(255,255,255,0.05);color:var(--text3);font-size:13px}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+.navbar{padding:14px 20px}
+.nav-links a:not(.btn){display:none}
+.hero{padding:120px 20px 60px}
+.section{padding:60px 20px}
+.showcase{padding:60px 20px}
+.showcase-grid{grid-template-columns:1fr}
+.features-grid{grid-template-columns:1fr}
+.pricing-grid{grid-template-columns:1fr}
+.compare-table{font-size:12px}
+.compare-table th,.compare-table td{padding:10px 8px}
+.footer-grid{grid-template-columns:1fr 1fr;gap:24px}
+.section-title h2{font-size:30px}
+}
+@media(max-width:480px){
+.footer-grid{grid-template-columns:1fr}
+}
+</style>
 </head>
 <body>
-    <nav class="navbar">
-        <a href="/" class="logo">
-            <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
-                <rect width="40" height="40" rx="10" fill="url(#g)"/>
-                <path d="M12 28V16L20 10L28 16V28H12Z" fill="white" opacity="0.9"/>
-                <defs><linearGradient id="g" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#667eea"/><stop offset="1" stop-color="#764ba2"/></linearGradient></defs>
-            </svg>
-            Render a House <span style="color:#f5a623;font-size:13px;margin-left:4px;">MAX</span>
-        </a>
-        <div class="nav-links">
-            <a href="#features">Funcionalidades</a>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="login.html" class="btn btn-primary">Começar Grátis</a>
-        </div>
-    </nav>
 
-    <section class="hero">
-        <h1>Renders que não parecem renders</h1>
-        <p>Transforme seus desenhos arquitetônicos em renders foto-realistas — gratuitamente, sem limites, sem marcas d'água.</p>
-        <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;">
-            <a href="login.html" class="btn btn-gold" style="font-size:18px;padding:16px 36px;">🚀 Começar Grátis</a>
-            <a href="dashboard.html" class="btn btn-primary" style="font-size:18px;padding:16px 36px;">Dashboard</a>
-        </div>
-        <p style="margin-top:24px;font-size:13px;color:#f5a623;">✦ Acesso completo • Ilimitado • Sem watermark • Para sempre</p>
-    </section>
+<!-- NAVBAR -->
+<nav class="navbar">
+<a href="/" class="logo">
+<div class="logo-icon">🏠</div>
+Render a House<span>MAX</span>
+</a>
+<div class="nav-links">
+<a href="#features">Funcionalidades</a>
+<a href="#pricing">Planos</a>
+<a href="#showcase">Exemplos</a>
+<a href="dashboard.html" class="btn btn-primary btn-sm">Dashboard</a>
+<a href="login.html" class="btn btn-gold btn-sm">Começar Grátis</a>
+</div>
+</nav>
 
-    <section class="features" id="features">
-        <h2>Todas as Funcionalidades — Ilimitadas</h2>
-        <div class="features-grid">
-            <div class="feature-card"><div class="icon">🎨</div><h3>Render Pro 4K</h3><p>Renders em altíssima resolução com o modelo Pro.</p><span class="badge-unlock">✅ Ilimitado</span></div>
-            <div class="feature-card"><div class="icon">⚡</div><h3>Render Rápido</h3><p>Fast, Standard e Pro. Resultados em segundos.</p><span class="badge-unlock">✅ Ilimitado</span></div>
-            <div class="feature-card"><div class="icon">🎬</div><h3>Geração de Vídeo</h3><p>Walkthroughs profissionais dos seus projetos.</p><span class="badge-unlock">✅ Ilimitado</span></div>
-            <div class="feature-card"><div class="icon">🏗️</div><h3>Importação 3D</h3><p>GLB, GLTF, OBJ do SketchUp, Revit, Blender.</p><span class="badge-unlock">✅ Ilimitado</span></div>
-            <div class="feature-card"><div class="icon">🗺️</div><h3>Preview 3D Satélite</h3><p>Posicione o modelo em terreno real de satélite.</p><span class="badge-unlock">✅ Completo</span></div>
-            <div class="feature-card"><div class="icon">✏️</div><h3>Edição por Área</h3><p>Selecione e edite sem regenerar o render inteiro.</p><span class="badge-unlock">✅ Ilimitado</span></div>
-            <div class="feature-card"><div class="icon">🎭</div><h3>Estilos Diversos</h3><p>Real photo, sketch, blueprint, watercolor e mais.</p><span class="badge-unlock">✅ Completo</span></div>
-            <div class="feature-card"><div class="icon">☀️</div><h3>Controle de Iluminação</h3><p>Hora do dia, clima, estações — controle total.</p><span class="badge-unlock">✅ Completo</span></div>
-            <div class="feature-card"><div class="icon">🤖</div><h3>Assistente IA</h3><p>Chat que cria prompts automaticamente para si.</p><span class="badge-unlock">✅ Completo</span></div>
-            <div class="feature-card"><div class="icon">📋</div><h3>Copy Render</h3><p>Copie estilos entre perspectivas do projeto.</p><span class="badge-unlock">✅ Ilimitado</span></div>
-            <div class="feature-card"><div class="icon">📁</div><h3>Projetos Ilimitados</h3><p>Sem limites de projetos, views ou renders.</p><span class="badge-unlock">✅ Ilimitado</span></div>
-            <div class="feature-card"><div class="icon">⏫</div><h3>Upscale/Enhance</h3><p>Melhore a qualidade com um clique.</p><span class="badge-unlock">✅ Ilimitado</span></div>
-            <div class="feature-card"><div class="icon">⚡</div><h3>Fila Prioritária</h3><p>Processamento prioritário dos seus renders.</p><span class="badge-unlock">✅ Ativado</span></div>
-            <div class="feature-card"><div class="icon">📥</div><h3>Sem Watermark</h3><p>Download PNG/JPG sem marcas d'água.</p><span class="badge-unlock">✅ Ilimitado</span></div>
-            <div class="feature-card"><div class="icon">🔗</div><h3>Compartilhamento</h3><p>Links públicos para compartilhar renders.</p><span class="badge-unlock">✅ Ilimitado</span></div>
-            <div class="feature-card"><div class="icon">♾️</div><h3>Créditos Ilimitados</h3><p>Sem limites diários nem mensais. Para sempre.</p><span class="badge-unlock">✅ Ilimitado</span></div>
-        </div>
-    </section>
+<!-- HERO -->
+<section class="hero">
+<div class="hero-badge">✨ Plano Máximo — Completamente Grátis</div>
+<h1><span class="gradient">Renders que não<br>parecem renders</span></h1>
+<p>Transforme os seus desenhos arquitetónicos, esboços e modelos 3D em renders foto-realistas com iluminação, materiais e texturas precisas — tudo gratuito e sem limites.</p>
+<div class="hero-actions">
+<a href="login.html" class="btn btn-gold btn-lg">🚀 Começar Grátis Agora</a>
+<a href="dashboard.html" class="btn btn-outline btn-lg">📊 Ver Dashboard</a>
+</div>
+<div class="hero-features">
+<div class="hero-feat">✓ Sem limites de créditos</div>
+<div class="hero-feat">✓ Sem watermark</div>
+<div class="hero-feat">✓ Pro 4K incluído</div>
+<div class="hero-feat">✓ Para sempre grátis</div>
+</div>
+</section>
 
-    <section class="section-full">
-        <h2>💎 Plano Máximo — Completamente Grátis</h2>
-        <p>Todas as funcionalidades dos planos Basic, Pro e Studio desbloqueadas. Sem limites, sem watermarks, sem expiração.</p>
-        <span class="badge-big">✨ Acesso Vitalício — Tudo Incluído ✨</span>
-    </section>
+<!-- FEATURES -->
+<section class="section" id="features">
+<div class="section-title">
+<h2>Todas as <span>Funcionalidades</span> do Plano Máximo</h2>
+<p>O pacote completo dos planos Basic, Pro e Studio — totalmente desbloqueado e gratuito.</p>
+</div>
+<div class="features-grid">
+<div class="feature-card"><div class="f-icon">🎨</div><h3>Render Pro 4K</h3><p>Renders em altíssima resolução (até 3840×2160) com o modelo Pro para apresentações profissionais.</p><span class="f-badge">✅ Ilimitado</span></div>
+<div class="feature-card"><div class="f-icon">⚡</div><h3>Render Standard & Fast</h3><p>Três modelos de render: Fast (segundos), Standard (qualidade média) e Pro (máxima qualidade).</p><span class="f-badge">✅ Ilimitado</span></div>
+<div class="feature-card"><div class="f-icon">🎬</div><h3>Geração de Vídeo</h3><p>Crie vídeos walkthrough dos seus projetos arquitetónicos com movimento de câmara profissional.</p><span class="f-badge">✅ Ilimitado</span></div>
+<div class="feature-card"><div class="f-icon">🏗️</div><h3>Importação 3D</h3><p>Suporte para GLB, GLTF e OBJ — exporte do SketchUp, Revit, Rhino, Blender e outros.</p><span class="f-badge">✅ Ilimitado</span></div>
+<div class="feature-card"><div class="f-icon">🗺️</div><h3>Preview 3D com Satélite</h3><p>Posicione o seu modelo 3D em terreno real de satélite. Câmera livre com modos órbita, pan e voo (WASD).</p><span class="f-badge">✅ Completo</span></div>
+<div class="feature-card"><div class="f-icon">✏️</div><h3>Edição por Área (Inpainting)</h3><p>Selecione uma região específica da imagem e edite sem regenerar o render inteiro. Ideal para ajustes pontuais.</p><span class="f-badge">✅ Ilimitado</span></div>
+<div class="feature-card"><div class="f-icon">🎭</div><h3>Biblioteca de Estilos</h3><p>Real Photo, Sketch, Blueprint, Watercolor, Concept Art, Epic Dusk, Autumn Forest e mais.</p><span class="f-badge">✅ Completa</span></div>
+<div class="feature-card"><div class="f-icon">☀️</div><h3>Controlo de Iluminação</h3><p>Hora do dia (amanhecer ao anoitecer), clima (ensolarado a nevado), estações e ambiente.</p><span class="f-badge">✅ Completo</span></div>
+<div class="feature-card"><div class="f-icon">🤖</div><h3>Assistente de Chat IA</h3><p>Assistente integrado que faz perguntas guiadas e cria os prompts automaticamente. Nunca escreva do zero.</p><span class="f-badge">✅ Completo</span></div>
+<div class="feature-card"><div class="f-icon">📋</div><h3>Copy Render</h3><p>Copie estilos, materiais e iluminação entre diferentes perspectivas do mesmo projeto.</p><span class="f-badge">✅ Ilimitado</span></div>
+<div class="feature-card"><div class="f-icon">📁</div><h3>Projetos & Pastas Ilimitados</h3><p>Organize os seus projetos em pastas. Projetos, views e renders sem qualquer limite.</p><span class="f-badge">✅ Ilimitado</span></div>
+<div class="feature-card"><div class="f-icon">📊</div><h3>Comparação Before/After</h3><p>Slider interativo para comparar versões de renders. Histórico completo de todas as iterações.</p><span class="f-badge">✅ Completo</span></div>
+<div class="feature-card"><div class="f-icon">⏫</div><h3>Upscale & Enhance</h3><p>Aumente a resolução e melhore a qualidade dos seus renders com um clique.</p><span class="f-badge">✅ Ilimitado</span></div>
+<div class="feature-card"><div class="f-icon">📥</div><h3>Download PNG/JPG</h3><p>Download em alta resolução sem marcas d'água. Sempre.</p><span class="f-badge">✅ Ilimitado</span></div>
+<div class="feature-card"><div class="f-icon">🔗</div><h3>Links de Compartilhamento</h3><p>Links públicos read-only para partilhar renders com clientes e equipa.</p><span class="f-badge">✅ Ilimitado</span></div>
+<div class="feature-card"><div class="f-icon">⚡</div><h3>Fila Prioritária</h3><p>Processamento prioritário — os seus renders são processados primeiro na fila.</p><span class="f-badge">✅ Ativado</span></div>
+<div class="feature-card"><div class="f-icon">🌍</div><h3>Upload de Estilo Personalizado</h3><p>Carregue uma imagem de referência como estilo para guiar o resultado do render.</p><span class="f-badge">✅ Ilimitado</span></div>
+<div class="feature-card"><div class="f-icon">🔄</div><h3>Nova Versão vs Editar</h3><p>Duas opções: gerar nova versão (mudanças globais) ou editar imagem atual (mudanças locais).</p><span class="f-badge">✅ Completo</span></div>
+</div>
+</section>
 
-    <footer><p>Render a House MAX © 2026 — Versão Completa e Gratuita.</p></footer>
-</body>
-</html>
+<!-- SHOWCASE -->
+<section class="showcase" id="showcase">
+<div class="section-title">
+<h2>Exemplos de <span>Renders</span></h2>
+<p>Veja o que é possível criar com o Render a House MAX</p>
+</div>
+<div class="showcase-grid">
+<div class="showcase-item">
+<div class="showcase-visual">🏡</div>
+<div class="overlay"><h4>Casa Moderna</h4><p>Render Pro 4K • Real Photo • Pôr do Sol</p></div>
+</div>
+<div class="showcase-item">
+<div class="showcase-visual">🏛️</div>
+<div class="overlay"><h4>Edifício Comercial</h4><p>Render Standard 2K • Concept Art • Noite</p></div>
+</div>
+<div class="showcase-item">
+<div class="showcase-visual">🌳</div>
+<div class="overlay"><h4>Casa de Campo</h4><p>Render Pro 4K • Watercolor • Manhã</p></div>
+</div>
+<div class="showcase-item">
+<div class="showcase-visual">🏙️</div>
+<div class="overlay"><h4>Arranha-céus</h4><p>Render Standard 4K • Real Photo • Golden Hour</p></div>
+</div>
+</div>
+</section>
+
+<!-- PRICING BANNER -->
+<section class="pricing-banner" id="pricing">
+<h2>💎 Plano Máximo — <span style="background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Completamente Grátis</span></h2>
+<p>Todas as funcionalidades dos planos Basic ($19/mês), Pro ($39/mês) e Studio ($99/mês) — totalmente desbloqueadas gratuitamente. Sem limites, sem watermarks, sem expiração.</p>
+<span class="pricing-badge">✨ Acesso Vitalício — Tudo Incluído ✨</span>
+
+<div class="pricing-grid">
+<div class="pricing-card">
+<h3>Basic</h3>
+<div class="price">$19<small>/mês</small></div>
+<p style="color:var(--text3);font-size:13px">120 créditos/mês • 20/dia máx</p>
+<ul>
+<li>Render Standard 1K</li>
+<li>Importação 3D</li>
+<li>Edição por área</li>
+<li>Vídeo incluído</li>
+</ul>
+<div style="text-decoration:line-through;color:var(--text3);font-size:13px;margin-top:12px">Incluído no MAX ✓</div>
+</div>
+<div class="pricing-card featured">
+<h3>Pro</h3>
+<div class="price">$39<small>/mês</small></div>
+<p style="color:var(--text3);font-size:13px">240 créditos/mês • Sem limite diário</p>
+<ul>
+<li>Render Pro 4K</li>
+<li>Copy Render</li>
+<li>Fila prioritária</li>
+<li>Comprar créditos extra</li>
+</ul>
+<div style="text-decoration:line-through;color:var(--text3);font-size:13px;margin-top:12px">Incluído no MAX ✓</div>
+</div>
+<div class="pricing-card">
+<h3>Studio</h3>
+<div class="price">$99<small>/mês</small></div>
+<p style="color:var(--text3);font-size:13px">1000 créditos/mês • Sem limite diário</p>
+<ul>
+<li>Tudo do Pro</li>
+<li>10.000 créditos rollover</li>
+<li>Auto-recharge</li>
+<li>Suporte prioritário</li>
+</ul>
+<div style="text-decoration:line-through;color:var(--text3);font-size:13px;margin-top:12px">Incluído no MAX ✓</div>
+</div>
+</div>
+
+<!-- COMPARE TABLE -->
+<table class="compare-table">
+<tr><th>Funcionalidade</th><th>Free</th><th>Basic</th><th>Pro</th><th>Studio</th><th style="color:var(--gold)">🔥 MAX</th></tr>
+<tr><td>Preço</td><td>$0</td><td>$19/mês</td><td>$39/mês</td><td>$99/mês</td><td style="color:var(--gold);font-weight:700">$0 GRÁTIS</td></tr>
+<tr><td>Créditos/mês</td><td>3/dia</td><td>120</td><td>240</td><td>1000</td><td style="color:var(--gold);font-weight:700">♾️ Ilimitado</td></tr>
+<tr><td>Render Pro 4K</td><td class="cross">✗</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr
